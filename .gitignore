@@ -1,6 +1,6 @@
 # Binaries
-kuma
-kuma.exe
+/kuma
+/kuma.exe
 /dist/
 
 # Go
