@@ -2,6 +2,8 @@ package kumaapi
 
 import (
 	"context"
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
 
@@ -66,6 +68,13 @@ func (a *API) AddMonitor(ctx context.Context, req models.AddMonitorRequest) (int
 	if req.Conditions == nil {
 		req.Conditions = []models.MonitorCondition{}
 	}
+	if req.Type == models.MonitorTypePush && req.PushToken == "" {
+		token, err := generatePushToken()
+		if err != nil {
+			return 0, err
+		}
+		req.PushToken = token
+	}
 
 	args, err := a.c.EmitWithAck(ctx, "add", req)
 	if err != nil {
@@ -81,6 +90,14 @@ func (a *API) AddMonitor(ctx context.Context, req models.AddMonitorRequest) (int
 		return 0, fmt.Errorf("kumaapi: add rejected: %s", resp.Msg)
 	}
 	return resp.MonitorID, nil
+}
+
+func generatePushToken() (string, error) {
+	buf := make([]byte, 16)
+	if _, err := rand.Read(buf); err != nil {
+		return "", fmt.Errorf("kumaapi: generate push token: %w", err)
+	}
+	return hex.EncodeToString(buf), nil
 }
 
 // EditMonitor updates an existing monitor. The req.ID field must be set.

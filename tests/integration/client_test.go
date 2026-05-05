@@ -15,7 +15,9 @@ package integration
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"os"
+	"sync"
 	"testing"
 	"time"
 
@@ -25,9 +27,10 @@ import (
 // ── Test config ──────────────────────────────────────────────────────────────
 
 type config struct {
-	URL  string
-	User string
-	Pass string
+	URL   string
+	User  string
+	Pass  string
+	Token string
 }
 
 func testConfig() config {
@@ -38,11 +41,18 @@ func testConfig() config {
 		return fallback
 	}
 	return config{
-		URL:  get("KUMA_URL", "http://localhost:3002"),
-		User: get("KUMA_USER", "joel.keb"),
-		Pass: get("KUMA_PASS", ""),
+		URL:   get("KUMA_URL", "http://localhost:3002"),
+		User:  get("KUMA_USER", "joel.keb"),
+		Pass:  get("KUMA_PASS", ""),
+		Token: get("KUMA_TOKEN", ""),
 	}
 }
+
+var (
+	testTokenOnce sync.Once
+	testToken     string
+	testTokenErr  error
+)
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -63,16 +73,47 @@ func newConnectedClient(t *testing.T) *client.Client {
 
 func newAuthedClient(t *testing.T) *client.Client {
 	t.Helper()
-	cfg := testConfig()
 	c := newConnectedClient(t)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	t.Cleanup(cancel)
 
-	if err := c.Login(ctx, cfg.User, cfg.Pass); err != nil {
-		t.Fatalf("Login() error: %v", err)
+	if err := c.LoginWithToken(ctx, getTestToken(t)); err != nil {
+		t.Fatalf("LoginWithToken() error: %v", err)
 	}
 	return c
+}
+
+func getTestToken(t *testing.T) string {
+	t.Helper()
+	cfg := testConfig()
+	if cfg.Token != "" {
+		return cfg.Token
+	}
+	testTokenOnce.Do(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+
+		c := client.New(cfg.URL)
+		if err := c.Connect(ctx); err != nil {
+			testTokenErr = err
+			return
+		}
+		defer c.Disconnect()
+
+		if err := c.Login(ctx, cfg.User, cfg.Pass); err != nil {
+			testTokenErr = err
+			return
+		}
+		testToken = c.AuthToken()
+		if testToken == "" {
+			testTokenErr = fmt.Errorf("received empty auth token")
+		}
+	})
+	if testTokenErr != nil {
+		t.Fatalf("getTestToken() error: %v", testTokenErr)
+	}
+	return testToken
 }
 
 // ── Tests ─────────────────────────────────────────────────────────────────────

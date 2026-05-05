@@ -24,8 +24,8 @@ func newAuthedAPI(t *testing.T) *kumaapi.API {
 	}
 	t.Cleanup(api.Disconnect)
 
-	if err := api.Login(ctx, cfg.User, cfg.Pass); err != nil {
-		t.Fatalf("Login() error: %v", err)
+	if err := api.LoginWithToken(ctx, getTestToken(t)); err != nil {
+		t.Fatalf("LoginWithToken() error: %v", err)
 	}
 	return api
 }
@@ -294,5 +294,173 @@ func TestWatchHeartbeats(t *testing.T) {
 			hb.MonitorID, hb.Status, hb.Time, hb.Ping)
 	case <-watchCtx.Done():
 		t.Skip("no heartbeat received within 15s — monitor may not have fired yet (normal in CI)")
+	}
+}
+
+func TestAddPingMonitor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
+	api := newAuthedAPI(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	name := uniqueName("test-ping")
+	monitorID, err := api.AddMonitor(ctx, models.AddMonitorRequest{
+		Type:     models.MonitorTypePing,
+		Name:     name,
+		Hostname: "8.8.8.8",
+		Interval: 60,
+		Active:   true,
+	})
+	if err != nil {
+		t.Fatalf("AddMonitor(ping) error: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel2()
+		if err := api.DeleteMonitor(ctx2, monitorID, false); err != nil {
+			t.Logf("cleanup DeleteMonitor(%d) error: %v", monitorID, err)
+		}
+	})
+
+	monitors, err := api.ListMonitors(ctx)
+	if err != nil {
+		t.Fatalf("ListMonitors() error: %v", err)
+	}
+
+	found := false
+	for _, monitor := range monitors {
+		if monitor.ID == monitorID {
+			found = true
+			if monitor.Type != models.MonitorTypePing {
+				t.Errorf("expected type=%q, got %q", models.MonitorTypePing, monitor.Type)
+			}
+			break
+		}
+	}
+	if !found {
+		t.Fatalf("ping monitor id=%d not found in ListMonitors()", monitorID)
+	}
+}
+
+func TestAddPortMonitor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
+	api := newAuthedAPI(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	name := uniqueName("test-port")
+	monitorID, err := api.AddMonitor(ctx, models.AddMonitorRequest{
+		Type:     models.MonitorTypePort,
+		Name:     name,
+		Hostname: "github.com",
+		Port:     443,
+		Interval: 60,
+		Active:   true,
+	})
+	if err != nil {
+		t.Fatalf("AddMonitor(port) error: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel2()
+		if err := api.DeleteMonitor(ctx2, monitorID, false); err != nil {
+			t.Logf("cleanup DeleteMonitor(%d) error: %v", monitorID, err)
+		}
+	})
+
+	monitor, err := api.GetMonitor(ctx, monitorID)
+	if err != nil {
+		t.Fatalf("GetMonitor(%d) error: %v", monitorID, err)
+	}
+	if monitor.Type != models.MonitorTypePort {
+		t.Errorf("expected type=%q, got %q", models.MonitorTypePort, monitor.Type)
+	}
+	if monitor.Port != 443 {
+		t.Errorf("expected port=443, got %d", monitor.Port)
+	}
+}
+
+func TestAddDNSMonitor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
+	api := newAuthedAPI(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	name := uniqueName("test-dns")
+	monitorID, err := api.AddMonitor(ctx, models.AddMonitorRequest{
+		Type:           models.MonitorTypeDNS,
+		Name:           name,
+		Hostname:       "google.com",
+		DNSResolveType: "A",
+		Interval:       60,
+		Active:         true,
+	})
+	if err != nil {
+		t.Fatalf("AddMonitor(dns) error: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel2()
+		if err := api.DeleteMonitor(ctx2, monitorID, false); err != nil {
+			t.Logf("cleanup DeleteMonitor(%d) error: %v", monitorID, err)
+		}
+	})
+
+	monitor, err := api.GetMonitor(ctx, monitorID)
+	if err != nil {
+		t.Fatalf("GetMonitor(%d) error: %v", monitorID, err)
+	}
+	if monitor.Type != models.MonitorTypeDNS {
+		t.Errorf("expected type=%q, got %q", models.MonitorTypeDNS, monitor.Type)
+	}
+	if monitor.DNSResolveType != "A" {
+		t.Errorf("expected DNSResolveType=A, got %q", monitor.DNSResolveType)
+	}
+}
+
+func TestAddPushMonitor(t *testing.T) {
+	if testing.Short() {
+		t.Skip("skipping integration test in short mode")
+	}
+
+	api := newAuthedAPI(t)
+	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	defer cancel()
+
+	name := uniqueName("test-push")
+	monitorID, err := api.AddMonitor(ctx, models.AddMonitorRequest{
+		Type:   models.MonitorTypePush,
+		Name:   name,
+		Active: true,
+	})
+	if err != nil {
+		t.Fatalf("AddMonitor(push) error: %v", err)
+	}
+	t.Cleanup(func() {
+		ctx2, cancel2 := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel2()
+		if err := api.DeleteMonitor(ctx2, monitorID, false); err != nil {
+			t.Logf("cleanup DeleteMonitor(%d) error: %v", monitorID, err)
+		}
+	})
+
+	monitor, err := api.GetMonitor(ctx, monitorID)
+	if err != nil {
+		t.Fatalf("GetMonitor(%d) error: %v", monitorID, err)
+	}
+	if monitor.Type != models.MonitorTypePush {
+		t.Errorf("expected type=%q, got %q", models.MonitorTypePush, monitor.Type)
+	}
+	if monitor.PushToken == "" {
+		t.Fatal("expected pushToken to be populated for push monitor")
 	}
 }

@@ -78,6 +78,9 @@ func (c *Client) LoginWithToken(ctx context.Context, token string) error {
 		}
 		return fmt.Errorf("%w: %s", ErrLoginFailed, msg)
 	}
+	if resp.Token == "" {
+		resp.Token = token
+	}
 
 	c.mu.Lock()
 	c.authed = true

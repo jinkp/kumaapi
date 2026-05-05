@@ -6,35 +6,35 @@ package models
 type MonitorType string
 
 const (
-	MonitorTypeHTTP            MonitorType = "http"
-	MonitorTypePort            MonitorType = "port"
-	MonitorTypePing            MonitorType = "ping"
-	MonitorTypeKeyword         MonitorType = "keyword"
-	MonitorTypeGRPCKeyword     MonitorType = "grpc-keyword"
-	MonitorTypeDNS             MonitorType = "dns"
-	MonitorTypeDocker          MonitorType = "docker"
-	MonitorTypeRealBrowser     MonitorType = "real-browser"
-	MonitorTypePush            MonitorType = "push"
-	MonitorTypeSteam           MonitorType = "steam"
-	MonitorTypeGameDig         MonitorType = "gamedig"
-	MonitorTypeMQTT            MonitorType = "mqtt"
-	MonitorTypeSQLServer       MonitorType = "sqlserver"
-	MonitorTypeMySQL           MonitorType = "mysql"
-	MonitorTypePostgres        MonitorType = "postgres"
-	MonitorTypeMongoDB         MonitorType = "mongodb"
-	MonitorTypeRadius          MonitorType = "radius"
-	MonitorTypeRedis           MonitorType = "redis"
-	MonitorTypeGroup           MonitorType = "group"
-	MonitorTypeTailscalePing   MonitorType = "tailscale-ping"
-	MonitorTypeWebSocket       MonitorType = "websocket-upgrade"
-	MonitorTypeSNMP            MonitorType = "snmp"
-	MonitorTypeRabbitMQ        MonitorType = "rabbitmq"
-	MonitorTypeSMTP            MonitorType = "smtp"
-	MonitorTypeSIPOptions      MonitorType = "sip-options"
-	MonitorTypeManual          MonitorType = "manual"
-	MonitorTypeGlobalping      MonitorType = "globalping"
-	MonitorTypeSystemService   MonitorType = "system-service"
-	MonitorTypeOracleDB        MonitorType = "oracledb"
+	MonitorTypeHTTP          MonitorType = "http"
+	MonitorTypePort          MonitorType = "port"
+	MonitorTypePing          MonitorType = "ping"
+	MonitorTypeKeyword       MonitorType = "keyword"
+	MonitorTypeGRPCKeyword   MonitorType = "grpc-keyword"
+	MonitorTypeDNS           MonitorType = "dns"
+	MonitorTypeDocker        MonitorType = "docker"
+	MonitorTypeRealBrowser   MonitorType = "real-browser"
+	MonitorTypePush          MonitorType = "push"
+	MonitorTypeSteam         MonitorType = "steam"
+	MonitorTypeGameDig       MonitorType = "gamedig"
+	MonitorTypeMQTT          MonitorType = "mqtt"
+	MonitorTypeSQLServer     MonitorType = "sqlserver"
+	MonitorTypeMySQL         MonitorType = "mysql"
+	MonitorTypePostgres      MonitorType = "postgres"
+	MonitorTypeMongoDB       MonitorType = "mongodb"
+	MonitorTypeRadius        MonitorType = "radius"
+	MonitorTypeRedis         MonitorType = "redis"
+	MonitorTypeGroup         MonitorType = "group"
+	MonitorTypeTailscalePing MonitorType = "tailscale-ping"
+	MonitorTypeWebSocket     MonitorType = "websocket-upgrade"
+	MonitorTypeSNMP          MonitorType = "snmp"
+	MonitorTypeRabbitMQ      MonitorType = "rabbitmq"
+	MonitorTypeSMTP          MonitorType = "smtp"
+	MonitorTypeSIPOptions    MonitorType = "sip-options"
+	MonitorTypeManual        MonitorType = "manual"
+	MonitorTypeGlobalping    MonitorType = "globalping"
+	MonitorTypeSystemService MonitorType = "system-service"
+	MonitorTypeOracleDB      MonitorType = "oracledb"
 )
 
 // MonitorStatus mirrors Uptime Kuma heartbeat status codes.
@@ -57,30 +57,30 @@ type Monitor struct {
 	ID     int         `json:"id,omitempty"`
 	Name   string      `json:"name"`
 	Type   MonitorType `json:"type"`
-	Active FlexInt `json:"active,omitempty"` // 0 = paused, 1 = active; server sends int or bool
+	Active FlexInt     `json:"active,omitempty"` // 0 = paused, 1 = active; server sends int or bool
 
 	// Target
-	URL          string `json:"url,omitempty"`
-	Hostname     string `json:"hostname,omitempty"`
-	Port         int    `json:"port,omitempty"`
-	Method       string `json:"method,omitempty"` // GET, POST, etc.
+	URL      string `json:"url,omitempty"`
+	Hostname string `json:"hostname,omitempty"`
+	Port     int    `json:"port,omitempty"`
+	Method   string `json:"method,omitempty"` // GET, POST, etc.
 
 	// Timing
 	Interval      int `json:"interval,omitempty"`      // seconds
 	RetryInterval int `json:"retryInterval,omitempty"` // seconds
 	MaxRetries    int `json:"maxretries,omitempty"`
-	Timeout       int `json:"timeout,omitempty"`       // seconds
+	Timeout       int `json:"timeout,omitempty"` // seconds
 
 	// HTTP options
-	Body              string            `json:"body,omitempty"`
-	Headers           string            `json:"headers,omitempty"`
-	BasicAuthUser     string            `json:"basic_auth_user,omitempty"`
-	BasicAuthPass     string            `json:"basic_auth_pass,omitempty"`
-	HTTPBodyEncoding  string            `json:"httpBodyEncoding,omitempty"`
-	AcceptedStatCodes []string          `json:"accepted_statuscodes,omitempty"`
-	IgnoreTLS         bool              `json:"ignoreTls,omitempty"`
-	MaxRedirects      int               `json:"maxredirects,omitempty"`
-	ExpiryNotify      bool              `json:"expiryNotification,omitempty"`
+	Body              string   `json:"body,omitempty"`
+	Headers           string   `json:"headers,omitempty"`
+	BasicAuthUser     string   `json:"basic_auth_user,omitempty"`
+	BasicAuthPass     string   `json:"basic_auth_pass,omitempty"`
+	HTTPBodyEncoding  string   `json:"httpBodyEncoding,omitempty"`
+	AcceptedStatCodes []string `json:"accepted_statuscodes,omitempty"`
+	IgnoreTLS         bool     `json:"ignoreTls,omitempty"`
+	MaxRedirects      int      `json:"maxredirects,omitempty"`
+	ExpiryNotify      bool     `json:"expiryNotification,omitempty"`
 
 	// Keyword / JSON path
 	Keyword          string `json:"keyword,omitempty"`
@@ -93,6 +93,24 @@ type Monitor struct {
 	DNSResolveType   string `json:"dns_resolve_type,omitempty"`
 	DNSResolveServer string `json:"dns_resolve_server,omitempty"`
 	DNSLastResult    string `json:"dns_last_result,omitempty"`
+
+	// Docker
+	DockerContainer string `json:"docker_container,omitempty"`
+	DockerHost      int    `json:"docker_host,omitempty"`
+
+	// SMTP
+	SMTPSecurity string `json:"smtpSecurity,omitempty"`
+	SMTPUsername string `json:"smtpUsername,omitempty"`
+	SMTPPassword string `json:"smtpPassword,omitempty"`
+	SMTPFrom     string `json:"smtpFrom,omitempty"`
+	SMTPTo       string `json:"smtpTo,omitempty"`
+
+	// Database
+	DatabaseName             string `json:"databaseName,omitempty"`
+	DatabaseUsername         string `json:"databaseUsername,omitempty"`
+	DatabasePassword         string `json:"databasePassword,omitempty"`
+	DatabaseQuery            string `json:"databaseQuery,omitempty"`
+	DatabaseConnectionString string `json:"databaseConnectionString,omitempty"`
 
 	// Push monitor
 	PushToken string `json:"pushToken,omitempty"`
@@ -139,33 +157,47 @@ type MonitorCondition struct {
 // AddMonitorRequest is the payload for the "addMonitor" Socket.IO event.
 // Only set the fields relevant to the monitor type.
 type AddMonitorRequest struct {
-	Type              MonitorType     `json:"type"`
-	Name              string          `json:"name"`
-	URL               string          `json:"url,omitempty"`
-	Hostname          string          `json:"hostname,omitempty"`
-	Port              int             `json:"port,omitempty"`
-	Method            string          `json:"method,omitempty"`
-	Interval          int             `json:"interval,omitempty"`
-	RetryInterval     int             `json:"retryInterval,omitempty"`
-	MaxRetries        int             `json:"maxretries,omitempty"`
-	Timeout           int             `json:"timeout,omitempty"`
-	Active            bool            `json:"active"`
-	Body              string          `json:"body,omitempty"`
-	Headers           string          `json:"headers,omitempty"`
-	BasicAuthUser     string          `json:"basic_auth_user,omitempty"`
-	BasicAuthPass     string          `json:"basic_auth_pass,omitempty"`
-	IgnoreTLS         bool            `json:"ignoreTls,omitempty"`
-	Keyword           string          `json:"keyword,omitempty"`
-	InvertKeyword     bool            `json:"invertKeyword,omitempty"`
-	DNSResolveType    string          `json:"dns_resolve_type,omitempty"`
-	DNSResolveServer  string          `json:"dns_resolve_server,omitempty"`
-	ParentID          *int            `json:"parent,omitempty"`
-	ProxyID           *int            `json:"proxyId,omitempty"`
-	NotificationIDList map[string]bool `json:"notificationIDList"`
+	Type                     MonitorType     `json:"type"`
+	Name                     string          `json:"name"`
+	URL                      string          `json:"url,omitempty"`
+	Hostname                 string          `json:"hostname,omitempty"`
+	Port                     int             `json:"port,omitempty"`
+	Method                   string          `json:"method,omitempty"`
+	Interval                 int             `json:"interval,omitempty"`
+	RetryInterval            int             `json:"retryInterval,omitempty"`
+	MaxRetries               int             `json:"maxretries,omitempty"`
+	Timeout                  int             `json:"timeout,omitempty"`
+	Active                   bool            `json:"active"`
+	Body                     string          `json:"body,omitempty"`
+	Headers                  string          `json:"headers,omitempty"`
+	BasicAuthUser            string          `json:"basic_auth_user,omitempty"`
+	BasicAuthPass            string          `json:"basic_auth_pass,omitempty"`
+	IgnoreTLS                bool            `json:"ignoreTls,omitempty"`
+	MaxRedirects             int             `json:"maxredirects,omitempty"`
+	Keyword                  string          `json:"keyword,omitempty"`
+	InvertKeyword            bool            `json:"invertKeyword,omitempty"`
+	DNSResolveType           string          `json:"dns_resolve_type,omitempty"`
+	DNSResolveServer         string          `json:"dns_resolve_server,omitempty"`
+	PushToken                string          `json:"pushToken,omitempty"`
+	DockerContainer          string          `json:"docker_container,omitempty"`
+	DockerHost               int             `json:"docker_host,omitempty"`
+	SMTPSecurity             string          `json:"smtpSecurity,omitempty"`
+	SMTPUsername             string          `json:"smtpUsername,omitempty"`
+	SMTPPassword             string          `json:"smtpPassword,omitempty"`
+	SMTPFrom                 string          `json:"smtpFrom,omitempty"`
+	SMTPTo                   string          `json:"smtpTo,omitempty"`
+	DatabaseName             string          `json:"databaseName,omitempty"`
+	DatabaseUsername         string          `json:"databaseUsername,omitempty"`
+	DatabasePassword         string          `json:"databasePassword,omitempty"`
+	DatabaseQuery            string          `json:"databaseQuery,omitempty"`
+	DatabaseConnectionString string          `json:"databaseConnectionString,omitempty"`
+	ParentID                 *int            `json:"parent,omitempty"`
+	ProxyID                  *int            `json:"proxyId,omitempty"`
+	NotificationIDList       map[string]bool `json:"notificationIDList"`
 	// accepted_statuscodes: required for HTTP monitors, e.g. ["200-299"]
-	AcceptedStatCodes []string           `json:"accepted_statuscodes,omitempty"`
+	AcceptedStatCodes []string `json:"accepted_statuscodes,omitempty"`
 	// conditions: NOT NULL in DB — send [] for monitors that don't use conditions
-	Conditions        []MonitorCondition `json:"conditions"`
+	Conditions []MonitorCondition `json:"conditions"`
 }
 
 // EditMonitorRequest is the payload for the "editMonitor" event.
