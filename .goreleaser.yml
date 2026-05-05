@@ -5,7 +5,8 @@ before:
     - go mod tidy
 builds:
   - id: kuma
-    main: ./cmd/kuma/
+    dir: .
+    main: ./cmd/kuma
     binary: kuma
     env:
       - CGO_ENABLED=0
@@ -20,10 +21,7 @@ builds:
       - goos: windows
         goarch: arm64
     ldflags:
-      - -s -w
-      - -X github.com/jinkp/kumaapi/cmd/kuma.Version={{.Version}}
-      - -X github.com/jinkp/kumaapi/cmd/kuma.Commit={{.Commit}}
-      - -X github.com/jinkp/kumaapi/cmd/kuma.Date={{.Date}}
+      - -s -w -X main.Version={{.Version}} -X main.Commit={{.Commit}} -X main.Date={{.Date}}
 archives:
   - id: default
     name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
