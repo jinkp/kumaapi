@@ -1,0 +1,22 @@
+# Binaries
+kuma
+kuma.exe
+/dist/
+
+# Go
+*.test
+*.out
+coverage.html
+
+# Config con credenciales
+.env
+*.env.local
+config.local.yaml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+# Docker volumes (no queremos versionar datos)
+docker/data/

@@ -1,0 +1,15 @@
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:2
+    container_name: uptime-kuma-dev
+    ports:
+      - "3002:3001"
+    volumes:
+      - kuma-data:/app/data
+    restart: unless-stopped
+    environment:
+      - UPTIME_KUMA_IS_CONTAINER=1
+
+volumes:
+  kuma-data:
+    driver: local
